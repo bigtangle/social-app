@@ -83,7 +83,7 @@ stats.json
 .metro-health-check*
 
 # VSCode
-.vscode
+#.vscode
 
 # gitignore and github actions
 !.gitignore
