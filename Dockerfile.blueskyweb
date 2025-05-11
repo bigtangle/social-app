@@ -1,0 +1,24 @@
+# Use the official Node.js 18 Alpine base image for efficiency
+FROM node:22-alpine  
+
+# Install system dependencies
+ 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Create and set the working directory
+WORKDIR /app
+ 
+
+COPY . /app 
+RUN yarn install
+# Expose default ports
+# PDS (Personal Data Server) typically runs on 2583
+EXPOSE 19006
+
+
+
+
+# Entrypoint - adjust based on which service you want to run
+WORKDIR /app
+CMD ["yarn", "web"]
