@@ -114,7 +114,7 @@
     "@zxing/text-encoding": "^0.9.0",
     "array.prototype.findlast": "^1.2.3",
     "await-lock": "^2.2.2",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "base64-js": "^1.5.1",
     "bcp-47": "^2.1.0",

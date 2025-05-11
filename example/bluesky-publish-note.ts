@@ -1,5 +1,5 @@
 // Example: Login to Bluesky and publish a note using the AT Protocol API
-// Requires: npm install axios
+// Requires: yarn install axios
 
 import axios from 'axios'
 
@@ -69,11 +69,73 @@ async function listAllNotes(token: string, did: string): Promise<NoteRecord[]> {
   return res.data.records
 }
 
+async function uploadVideo(
+  token: string,
+  did: string,
+  videoPath: string,
+): Promise<string> {
+  const videoData = require('fs').readFileSync(videoPath)
+  const res = await axios.post(
+    `${BLUESKY_API}/xrpc/com.atproto.repo.uploadBlob`,
+    videoData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/octet-stream',
+      },
+    },
+  )
+  return res.data.blob
+}
+
+async function publishVideo(
+  token: string,
+  did: string,
+  text: string,
+  videoPath: string,
+): Promise<any> {
+  const now = new Date().toISOString()
+  const videoBlob = await uploadVideo(token, did, videoPath)
+  const res = await axios.post(
+    `${BLUESKY_API}/xrpc/com.atproto.repo.createRecord`,
+    {
+      repo: did,
+      collection: 'app.bsky.feed.post',
+      record: {
+        $type: 'app.bsky.feed.post',
+        text: text,
+        createdAt: now,
+        embed: {
+          $type: 'app.bsky.embed.video',
+          video: videoBlob,
+        },
+      },
+    },
+    {
+      headers: {Authorization: `Bearer ${token}`},
+    },
+  )
+  return res.data
+}
+
 ;(async () => {
   try {
     const {token, did} = await login(HANDLE, PASSWORD)
+
+    // Publish a text note
     const note = await publishNote(token, did, 'Hello from the Bluesky API!')
     console.log('Note published:', note)
+
+    // Publish a video note
+    const videoNote = await publishVideo(
+      token,
+      did,
+      'Check out this video!',
+      'E:/MiscE/VSCODE/BigTangle/social-app/social-app-1/ForBiggerEscapes.mp4',
+    )
+    console.log('Video note published:', videoNote)
+
+    // List all notes
     const notes = await listAllNotes(token, did)
     console.log('All published notes:')
     notes.forEach((n, i) => {
