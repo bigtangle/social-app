@@ -9,6 +9,7 @@ export function useServiceQuery(serviceUrl: string) {
     queryKey: RQKEY(serviceUrl),
     queryFn: async () => {
       const agent = new BskyAgent({service: serviceUrl})
+      console.log('serviceUrl', serviceUrl)
       const res = await agent.com.atproto.server.describeServer()
       return res.data
     },

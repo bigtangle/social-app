@@ -10,7 +10,11 @@
       "preLaunchTask": "yarn web",
       "sourceMaps": true,
       "trace": true,
-      "skipFiles": ["<node_internals>/**", "node_modules/**"]
-    }
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "env":  {
+        "LOG_LEVEL": "debug" // Enable verbose logging
+        }
+      }
+ 
   ]
 }
