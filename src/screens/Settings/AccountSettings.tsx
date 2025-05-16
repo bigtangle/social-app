@@ -1,10 +1,13 @@
+import * as React from 'react'
 import {msg, Trans} from '@lingui/macro'
 import {useLingui} from '@lingui/react'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
 import {type CommonNavigatorParams} from '#/lib/routes/types'
+import {logger} from '#/logger'
 import {useModalControls} from '#/state/modals'
 import {useSession} from '#/state/session'
+import * as Toast from '#/view/com/util/Toast'
 import * as SettingsList from '#/screens/Settings/components/SettingsList'
 import {atoms as a, useTheme} from '#/alf'
 import {useDialogControl} from '#/components/Dialog'
@@ -20,6 +23,24 @@ import {PencilLine_Stroke2_Corner2_Rounded as PencilIcon} from '#/components/ico
 import {ShieldCheck_Stroke2_Corner0_Rounded as ShieldIcon} from '#/components/icons/Shield'
 import {Trash_Stroke2_Corner2_Rounded} from '#/components/icons/Trash'
 import * as Layout from '#/components/Layout'
+import {Loader} from '#/components/Loader'
+declare global {
+  interface Window {
+    showSaveFilePicker: (options?: {
+      suggestedName?: string
+      types?: Array<{
+        description: string
+        accept: Record<string, string[]>
+      }>
+    }) => Promise<FileSystemFileHandle>
+  }
+}
+
+interface FileSystemFileHandle {
+  createWritable(
+    options?: FileSystemCreateWritableOptions,
+  ): Promise<FileSystemWritableFileStream>
+}
 import {ChangeHandleDialog} from './components/ChangeHandleDialog'
 import {DeactivateAccountDialog} from './components/DeactivateAccountDialog'
 import {ExportCarDialog} from './components/ExportCarDialog'
@@ -29,6 +50,7 @@ export function AccountSettingsScreen({}: Props) {
   const t = useTheme()
   const {_} = useLingui()
   const {currentAccount} = useSession()
+  const [fileLoading, setFileLoading] = React.useState(false) // Used below in save/load handlers
   const {openModal} = useModalControls()
   const verifyEmailControl = useDialogControl()
   const birthdayControl = useDialogControl()
@@ -131,6 +153,84 @@ export function AccountSettingsScreen({}: Props) {
               <Trans>Handle</Trans>
             </SettingsList.ItemText>
             <SettingsList.Chevron />
+          </SettingsList.PressableItem>
+
+          <SettingsList.PressableItem
+            label={_(msg`Save to File`)}
+            onPress={async () => {
+              try {
+                setFileLoading(true)
+                const content = `Backup - ${new Date().toLocaleString()}\nHandle: ${
+                  currentAccount?.handle
+                }\nEmail: ${currentAccount?.email}`
+
+                // Create file picker
+                const handle = await window.showSaveFilePicker({
+                  suggestedName: `backup-${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.txt`,
+                  types: [
+                    {
+                      description: 'Text Files',
+                      accept: {'text/plain': ['.txt']},
+                    },
+                  ],
+                })
+
+                // Write content to selected file
+                const writable = await handle.createWritable()
+                await writable.write(content)
+                await writable.close()
+                Toast.show(_(msg`File saved successfully!`))
+              } catch (e) {
+                logger.error('File save failed', {error: e})
+                Toast.show(_(msg`Failed to save file`), 'xmark')
+              } finally {
+                setFileLoading(false)
+              }
+            }}
+            disabled={fileLoading}>
+            <SettingsList.ItemIcon icon={LockIcon} />
+            <SettingsList.ItemText>
+              <Trans>Save Keys</Trans>
+            </SettingsList.ItemText>
+            {fileLoading ? <Loader /> : <SettingsList.Chevron />}
+          </SettingsList.PressableItem>
+
+          <SettingsList.PressableItem
+            label={_(msg`Load from File`)}
+            onPress={() => {
+              const input = document.createElement('input')
+              input.type = 'file'
+              input.accept = '.txt'
+
+              input.onchange = async (e: Event) => {
+                try {
+                  setFileLoading(true)
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) {
+                    const reader = new FileReader()
+                    reader.onload = event => {
+                      const content = event.target?.result
+                      Toast.show(_(msg`Loaded file content: ${content}`))
+                    }
+                    reader.readAsText(file)
+                  }
+                } catch (e) {
+                  logger.error('File load failed', {error: e})
+                  Toast.show(_(msg`Failed to load file`), 'xmark')
+                } finally {
+                  setFileLoading(false)
+                }
+              }
+              input.click()
+            }}
+            disabled={fileLoading}>
+            <SettingsList.ItemIcon icon={LockIcon} />
+            <SettingsList.ItemText>
+              <Trans>Load Keys</Trans>
+            </SettingsList.ItemText>
+            {fileLoading ? <Loader /> : <SettingsList.Chevron />}
           </SettingsList.PressableItem>
           <SettingsList.Divider />
           <SettingsList.PressableItem
