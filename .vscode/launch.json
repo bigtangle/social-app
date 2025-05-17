@@ -14,7 +14,18 @@
       "env":  {
         "LOG_LEVEL": "debug" // Enable verbose logging
         }
-      }
- 
+      },
+      {
+      "type": "node",
+      "request": "launch",
+      "name": "Compile & Run TS in Example",
+      "preLaunchTask": "compile-ts-to-example",
+      "program": "${workspaceFolder}/example/${fileBasenameNoExtension}.js",
+      "outFiles": ["${workspaceFolder}/example/**/*.js"],
+      "sourceMaps": true,
+      "trace": true,  // Optional: helps debug sourcemap issues
+      "skipFiles": ["<node_internals>/**"]
+    }
   ]
 }
+

@@ -13,6 +13,16 @@
       "presentation": {
         "reveal": "always"
       }
+    },
+      {
+      "label": "compile-ts-to-example",
+      "type": "shell",
+      "command": "tsc ${file} --outDir example  --sourceMap true",
+      "problemMatcher": ["$tsc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }
