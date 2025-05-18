@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {type Image as RNImage} from 'react-native-image-crop-picker'
 import Animated, {FadeOut} from 'react-native-reanimated'
 import {LinearGradient} from 'expo-linear-gradient'
 import {type AppBskyActorDefs} from '@atproto/api'
@@ -18,6 +17,7 @@ import {useLingui} from '@lingui/react'
 import {MAX_DESCRIPTION, MAX_DISPLAY_NAME, urls} from '#/lib/constants'
 import {usePalette} from '#/lib/hooks/usePalette'
 import {compressIfNeeded} from '#/lib/media/manip'
+import {type PickerImage} from '#/lib/media/picker.shared'
 import {cleanError} from '#/lib/strings/errors'
 import {enforceLen} from '#/lib/strings/helpers'
 import {colors, gradients, s} from '#/lib/styles'
@@ -53,6 +53,7 @@ export function Component({
   const {closeModal} = useModalControls()
   const updateMutation = useProfileUpdateMutation()
   const [imageError, setImageError] = useState<string>('')
+  const initialDisplayName = profile.displayName || ''
   const [displayName, setDisplayName] = useState<string>(
     profile.displayName || '',
   )
@@ -66,16 +67,16 @@ export function Component({
     profile.avatar,
   )
   const [newUserBanner, setNewUserBanner] = useState<
-    RNImage | undefined | null
+    PickerImage | undefined | null
   >()
   const [newUserAvatar, setNewUserAvatar] = useState<
-    RNImage | undefined | null
+    PickerImage | undefined | null
   >()
   const onPressCancel = () => {
     closeModal()
   }
   const onSelectNewAvatar = useCallback(
-    async (img: RNImage | null) => {
+    async (img: PickerImage | null) => {
       setImageError('')
       if (img === null) {
         setNewUserAvatar(null)
@@ -94,7 +95,7 @@ export function Component({
   )
 
   const onSelectNewBanner = useCallback(
-    async (img: RNImage | null) => {
+    async (img: PickerImage | null) => {
       setImageError('')
       if (!img) {
         setNewUserBanner(null)
@@ -145,7 +146,6 @@ export function Component({
   const verification = useSimpleVerificationState({
     profile,
   })
-  const [touchedDisplayName, setTouchedDisplayName] = useState(false)
 
   return (
     <KeyboardAvoidingView style={s.flex1} behavior="height">
@@ -193,12 +193,11 @@ export function Component({
               accessible={true}
               accessibilityLabel={_(msg`Display name`)}
               accessibilityHint={_(msg`Edit your display name`)}
-              onFocus={() => setTouchedDisplayName(true)}
             />
 
             {verification.isVerified &&
               verification.role === 'default' &&
-              touchedDisplayName && (
+              displayName !== initialDisplayName && (
                 <View style={{paddingTop: 8}}>
                   <Admonition type="error">
                     <Trans>

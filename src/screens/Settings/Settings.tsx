@@ -3,11 +3,12 @@ import {LayoutAnimation, Pressable, View} from 'react-native'
 import {Linking} from 'react-native'
 import {useReducedMotion} from 'react-native-reanimated'
 import {type AppBskyActorDefs, moderateProfile} from '@atproto/api'
-import {msg, Trans} from '@lingui/macro'
+import {msg, t, Trans} from '@lingui/macro'
 import {useLingui} from '@lingui/react'
 import {useNavigation} from '@react-navigation/native'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
+import {useActorStatus} from '#/lib/actor-status'
 import {IS_INTERNAL} from '#/lib/app-info'
 import {HELP_DESK_URL} from '#/lib/constants'
 import {useAccountSwitcher} from '#/lib/hooks/useAccountSwitcher'
@@ -18,6 +19,7 @@ import {
 import {sanitizeDisplayName} from '#/lib/strings/display-names'
 import {sanitizeHandle} from '#/lib/strings/handles'
 import {useProfileShadow} from '#/state/cache/profile-shadow'
+import * as persisted from '#/state/persisted'
 import {clearStorage} from '#/state/persisted'
 import {useModerationOpts} from '#/state/preferences/moderation-opts'
 import {useDeleteActorDeclaration} from '#/state/queries/messages/actor-declaration'
@@ -286,10 +288,15 @@ function ProfilePreview({
   const verificationState = useFullVerificationState({
     profile: shadow,
   })
+  const {isActive: live} = useActorStatus(profile)
 
   if (!moderationOpts) return null
 
   const moderation = moderateProfile(profile, moderationOpts)
+  const displayName = sanitizeDisplayName(
+    profile.displayName || sanitizeHandle(profile.handle),
+    moderation.ui('displayName'),
+  )
 
   return (
     <>
@@ -298,9 +305,17 @@ function ProfilePreview({
         avatar={shadow.avatar}
         moderation={moderation.ui('avatar')}
         type={shadow.associated?.labeler ? 'labeler' : 'user'}
+        live={live}
       />
 
-      <View style={[a.flex_row, a.gap_xs, a.align_center]}>
+      <View
+        style={[
+          a.flex_row,
+          a.gap_xs,
+          a.align_center,
+          a.justify_center,
+          a.w_full,
+        ]}>
         <Text
           emoji
           testID="profileHeaderDisplayName"
@@ -311,10 +326,7 @@ function ProfilePreview({
             gtMobile ? a.text_4xl : a.text_3xl,
             a.font_heavy,
           ]}>
-          {sanitizeDisplayName(
-            profile.displayName || sanitizeHandle(profile.handle),
-            moderation.ui('displayName'),
-          )}
+          {displayName}
         </Text>
         {shouldShowVerificationCheckButton(verificationState) && (
           <View
@@ -349,6 +361,17 @@ function DevOptions() {
   const clearAllStorage = async () => {
     await clearStorage()
     Toast.show(_(msg`Storage cleared, you need to restart the app now.`))
+  }
+
+  const onPressUnsnoozeReminder = () => {
+    const lastEmailConfirm = new Date()
+    // wind back 3 days
+    lastEmailConfirm.setDate(lastEmailConfirm.getDate() - 3)
+    persisted.write('reminders', {
+      ...persisted.get('reminders'),
+      lastEmailConfirm: lastEmailConfirm.toISOString(),
+    })
+    Toast.show(t`You probably want to restart the app now.`)
   }
 
   return (
@@ -386,6 +409,13 @@ function DevOptions() {
         label={_(msg`Reset onboarding state`)}>
         <SettingsList.ItemText>
           <Trans>Reset onboarding state</Trans>
+        </SettingsList.ItemText>
+      </SettingsList.PressableItem>
+      <SettingsList.PressableItem
+        onPress={onPressUnsnoozeReminder}
+        label={_(msg`Unsnooze email reminder`)}>
+        <SettingsList.ItemText>
+          <Trans>Unsnooze email reminder</Trans>
         </SettingsList.ItemText>
       </SettingsList.PressableItem>
       <SettingsList.PressableItem
@@ -441,6 +471,7 @@ function AccountRow({
   const moderationOpts = useModerationOpts()
   const removePromptControl = Prompt.usePromptControl()
   const {removeAccount} = useSessionApi()
+  const {isActive: live} = useActorStatus(profile)
 
   const onSwitchAccount = () => {
     if (pendingDid) return
@@ -458,6 +489,8 @@ function AccountRow({
             avatar={profile.avatar}
             moderation={moderateProfile(profile, moderationOpts).ui('avatar')}
             type={profile.associated?.labeler ? 'labeler' : 'user'}
+            live={live}
+            hideLiveBadge
           />
         ) : (
           <View style={[{width: 28}]} />
