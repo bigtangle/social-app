@@ -30,7 +30,10 @@ export function TestCtrls() {
         identifier: 'alice.test',
         password: 'hunter2',
       },
-      'LoginForm',
+      {
+        name: 'LoginForm',
+        properties: {}
+      },
     )
     setShowLoggedOut(false)
   }
@@ -41,7 +44,10 @@ export function TestCtrls() {
         identifier: 'bob.test',
         password: 'hunter2',
       },
-      'LoginForm',
+      {
+        name: 'LoginForm',
+        properties: {}
+      },
     )
     setShowLoggedOut(false)
   }

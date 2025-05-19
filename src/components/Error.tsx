@@ -1,32 +1,35 @@
-import {View} from 'react-native'
-import {msg, Trans} from '@lingui/macro'
-import {useLingui} from '@lingui/react'
+import {View} from 'react-native';
+import {msg, Trans} from '@lingui/macro';
+import {useLingui} from '@lingui/react';
+import type React from 'react';
 
-import {useGoBack} from '#/lib/hooks/useGoBack'
-import {CenteredView} from '#/view/com/util/Views'
-import {atoms as a, useBreakpoints, useTheme} from '#/alf'
-import {Button, ButtonText} from '#/components/Button'
-import {Text} from '#/components/Typography'
+import {useGoBack} from '#/lib/hooks/useGoBack';
+import {CenteredView} from '#/view/com/util/Views';
+import {atoms as a, useBreakpoints, useTheme} from '#/alf';
+import {Button, ButtonText} from '#/components/Button';
+import {Text} from '#/components/Typography';
+
+export interface ErrorProps {
+  title?: string;
+  message: React.ReactNode;
+  onRetry?: () => unknown;
+  onGoBack?: () => unknown;
+  hideBackButton?: boolean;
+  sideBorders?: boolean;
+}
 
 export function Error({
-  title,
+  title = 'Error',
   message,
   onRetry,
   onGoBack,
   hideBackButton,
   sideBorders = true,
-}: {
-  title?: string
-  message?: string
-  onRetry?: () => unknown
-  onGoBack?: () => unknown
-  hideBackButton?: boolean
-  sideBorders?: boolean
-}) {
-  const {_} = useLingui()
-  const t = useTheme()
-  const {gtMobile} = useBreakpoints()
-  const goBack = useGoBack(onGoBack)
+}: ErrorProps) {
+  const {_} = useLingui();
+  const t = useTheme();
+  const {gtMobile} = useBreakpoints();
+  const goBack = useGoBack(onGoBack);
 
   return (
     <CenteredView
@@ -81,5 +84,5 @@ export function Error({
         )}
       </View>
     </CenteredView>
-  )
+  );
 }

@@ -83,7 +83,7 @@ export function Component({}: {}) {
       })
       Toast.show(_(msg`Your account has been deleted`))
       resetToTab('HomeTab')
-      removeAccount(currentAccount)
+      removeAccount(currentAccount.did)
       closeModal()
     } catch (e: any) {
       setError(cleanError(e))

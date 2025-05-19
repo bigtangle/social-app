@@ -220,10 +220,10 @@ export function reducer(s: SignupState, a: SignupAction): SignupState {
       // Log background/foreground event during signup
       logger.metric(
         'signup:backgrounded',
-        {
-          activeStep: next.activeStep,
-          backgroundCount: next.backgroundCount,
-        },
+          {
+            activeStep: next.activeStep,
+            backgroundCount: next.backgroundCount,
+          },
         {statsig: true},
       )
       break
@@ -305,25 +305,14 @@ export function useSubmitSignup() {
       dispatch({type: 'setIsLoading', value: true})
 
       try {
-        await createAccount(
-          {
-            service: state.serviceUrl,
-            email: state.email,
-            handle: createFullHandle(state.handle, state.userDomain),
-            password: state.password,
-            birthDate: state.dateOfBirth,
-            inviteCode: state.inviteCode.trim(),
-            verificationCode: state.pendingSubmit?.verificationCode,
-          },
-          {
-            signupDuration: Date.now() - state.signupStartTime,
-            fieldErrorsTotal: Object.values(state.fieldErrors).reduce(
-              (a, b) => a + b,
-              0,
-            ),
-            backgroundCount: state.backgroundCount,
-          },
-        )
+        await createAccount({
+          service: state.serviceUrl,
+          did: '', // Will be populated by server response
+          handle: createFullHandle(state.handle, state.userDomain),
+          email: state.email,
+          accessJwt: 'pending', // Temporary placeholder
+          refreshJwt: 'pending' // Temporary placeholder
+        })
 
         /*
          * Must happen last so that if the user has multiple tabs open and

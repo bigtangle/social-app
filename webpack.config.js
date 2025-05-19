@@ -24,6 +24,18 @@ module.exports = async function (env, argv) {
     'react-native$': 'react-native-web',
     'react-native-webview': 'react-native-web-webview',
   })
+  
+  // Add Node.js polyfills for browser compatibility
+  config.resolve = {
+    ...config.resolve,
+    fallback: {
+      ...config.resolve?.fallback,
+      "crypto": require.resolve("crypto-browserify"),
+      "buffer": require.resolve("buffer/"),
+      "stream": require.resolve("stream-browserify")
+    }
+  }
+
   config.module.rules = [
     ...(config.module.rules || []),
     reactNativeWebWebviewConfiguration,
@@ -31,7 +43,6 @@ module.exports = async function (env, argv) {
   if (env.mode === 'development') {
     config.plugins.push(new ReactRefreshWebpackPlugin())
   } else {
-    // Support static CDN for chunks
     config.output.publicPath = 'auto'
   }
 
@@ -53,7 +64,6 @@ module.exports = async function (env, argv) {
         project: 'app',
         authToken: process.env.SENTRY_AUTH_TOKEN,
         release: {
-          // env is undefined for Render.com builds, fall back
           name: process.env.SENTRY_RELEASE || version,
           dist: process.env.SENTRY_DIST,
         },

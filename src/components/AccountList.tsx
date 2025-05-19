@@ -1,22 +1,24 @@
-import React, {useCallback} from 'react'
-import {View} from 'react-native'
-import {type AppBskyActorDefs} from '@atproto/api'
-import {msg, Trans} from '@lingui/macro'
-import {useLingui} from '@lingui/react'
+import React, {useCallback} from 'react';
+import {View} from 'react-native';
+import {type AppBskyActorDefs} from '@atproto/api';
+import {msg, Trans} from '@lingui/macro';
+import {useLingui} from '@lingui/react';
 
-import {useActorStatus} from '#/lib/actor-status'
-import {sanitizeDisplayName} from '#/lib/strings/display-names'
-import {sanitizeHandle} from '#/lib/strings/handles'
-import {useProfilesQuery} from '#/state/queries/profile'
-import {type SessionAccount, useSession} from '#/state/session'
-import {UserAvatar} from '#/view/com/util/UserAvatar'
-import {atoms as a, useTheme} from '#/alf'
-import {Check_Stroke2_Corner0_Rounded as Check} from '#/components/icons/Check'
-import {ChevronRight_Stroke2_Corner0_Rounded as Chevron} from '#/components/icons/Chevron'
-import {useSimpleVerificationState} from '#/components/verification'
-import {VerificationCheck} from '#/components/verification/VerificationCheck'
-import {Button} from './Button'
-import {Text} from './Typography'
+import {useActorStatus} from '#/lib/actor-status';
+import {sanitizeDisplayName} from '#/lib/strings/display-names';
+import {sanitizeHandle} from '#/lib/strings/handles';
+import {useProfilesQuery} from '#/state/queries/profile';
+import {useSession} from '#/state/session';
+import {UserAvatar} from '#/view/com/util/UserAvatar';
+import {atoms as a, useTheme} from '#/alf';
+import {Check_Stroke2_Corner0_Rounded as Check} from '#/components/icons/Check';
+import {ChevronRight_Stroke2_Corner0_Rounded as Chevron} from '#/components/icons/Chevron';
+import {useSimpleVerificationState} from '#/components/verification';
+import {VerificationCheck} from '#/components/verification/VerificationCheck';
+import {type Profile} from '#/types';
+import {type SessionAccount} from '../types';
+import {Button} from './Button';
+import {Text} from './Typography';
 
 export function AccountList({
   onSelectAccount,
@@ -24,21 +26,21 @@ export function AccountList({
   otherLabel,
   pendingDid,
 }: {
-  onSelectAccount: (account: SessionAccount) => void
-  onSelectOther: () => void
-  otherLabel?: string
-  pendingDid: string | null
+  onSelectAccount: (account: SessionAccount) => void;
+  onSelectOther: () => void;
+  otherLabel?: string;
+  pendingDid: string | null;
 }) {
-  const {currentAccount, accounts} = useSession()
-  const t = useTheme()
-  const {_} = useLingui()
+  const {currentAccount, accounts} = useSession();
+  const t = useTheme();
+  const {_} = useLingui();
   const {data: profiles} = useProfilesQuery({
     handles: accounts.map(acc => acc.did),
-  })
+  });
 
   const onPressAddAccount = useCallback(() => {
-    onSelectOther()
-  }, [onSelectOther])
+    onSelectOther();
+  }, [onSelectOther]);
 
   return (
     <View
@@ -52,7 +54,7 @@ export function AccountList({
       {accounts.map(account => (
         <React.Fragment key={account.did}>
           <AccountItem
-            profile={profiles?.profiles.find(p => p.did === account.did)}
+            profile={profiles?.profiles.find((p: Profile) => p.did === account.did)}
             account={account}
             onSelect={onSelectAccount}
             isCurrentAccount={account.did === currentAccount?.did}
@@ -92,7 +94,7 @@ export function AccountList({
         )}
       </Button>
     </View>
-  )
+  );
 }
 
 function AccountItem({
@@ -102,20 +104,20 @@ function AccountItem({
   isCurrentAccount,
   isPendingAccount,
 }: {
-  profile?: AppBskyActorDefs.ProfileViewDetailed
-  account: SessionAccount
-  onSelect: (account: SessionAccount) => void
-  isCurrentAccount: boolean
-  isPendingAccount: boolean
+  profile?: AppBskyActorDefs.ProfileViewDetailed;
+  account: SessionAccount;
+  onSelect: (account: SessionAccount) => void;
+  isCurrentAccount: boolean;
+  isPendingAccount: boolean;
 }) {
-  const t = useTheme()
-  const {_} = useLingui()
-  const verification = useSimpleVerificationState({profile})
-  const {isActive: live} = useActorStatus(profile)
+  const t = useTheme();
+  const {_} = useLingui();
+  const verification = useSimpleVerificationState({profile});
+  const {isActive: live} = useActorStatus(profile);
 
   const onPress = useCallback(() => {
-    onSelect(account)
-  }, [account, onSelect])
+    onSelect(account);
+  }, [account, onSelect]);
 
   return (
     <Button
@@ -179,5 +181,5 @@ function AccountItem({
         </View>
       )}
     </Button>
-  )
+  );
 }

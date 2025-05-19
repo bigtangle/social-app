@@ -93,7 +93,7 @@ function encryptWithPublicKey(text: string, publicKey: Buffer): string {
   const derivedKey = crypto.hkdfSync('sha256', sharedSecret, '', '', 32)
   const iv = crypto.randomBytes(16)
 
-  const cipher = crypto.createCipheriv('aes-256-gcm', derivedKey, iv)
+  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(derivedKey), iv)
   let encrypted = cipher.update(text, 'utf8', 'hex')
   encrypted += cipher.final('hex')
   const authTag = cipher.getAuthTag().toString('hex')
@@ -119,7 +119,7 @@ function decryptWithPrivateKey(
   const derivedKey = crypto.hkdfSync('sha256', sharedSecret, '', '', 32)
 
   const iv = Buffer.from(data.iv, 'hex')
-  const decipher = crypto.createDecipheriv('aes-256-gcm', derivedKey, iv)
+  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(derivedKey), iv)
   decipher.setAuthTag(Buffer.from(data.authTag, 'hex')) // ✅ this was commented out
 
   let decrypted = decipher.update(data.encryptedData, 'hex', 'utf8')

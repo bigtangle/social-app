@@ -1,5 +1,5 @@
 import React, {useRef} from 'react'
-import {KeyboardAvoidingView} from 'react-native'
+import {KeyboardAvoidingView, View} from 'react-native'
 import {LayoutAnimationConfig} from 'react-native-reanimated'
 import {msg} from '@lingui/macro'
 import {useLingui} from '@lingui/react'
@@ -16,6 +16,7 @@ import {LoginForm} from '#/screens/Login/LoginForm'
 import {PasswordUpdatedForm} from '#/screens/Login/PasswordUpdatedForm'
 import {SetNewPasswordForm} from '#/screens/Login/SetNewPasswordForm'
 import {atoms as a} from '#/alf'
+import {WalletLogin} from '#/components/wallet/WalletLogin'
 import {ChooseAccountForm} from './ChooseAccountForm'
 import {ScreenTransition} from './ScreenTransition'
 
@@ -196,6 +197,9 @@ export const Login = ({onPressBack}: {onPressBack: () => void}) => {
         <LayoutAnimationConfig skipEntering skipExiting>
           <ScreenTransition key={currentForm}>{content}</ScreenTransition>
         </LayoutAnimationConfig>
+        <View style={{padding: 20, borderTopWidth: 1, borderTopColor: '#eee'}}>
+          <WalletLogin />
+        </View>
       </LoggedOutLayout>
     </KeyboardAvoidingView>
   )

@@ -3,12 +3,12 @@ import {
   ActivityIndicator,
   Keyboard,
   LayoutAnimation,
-  TextInput,
+  type TextInput,
   View,
 } from 'react-native'
 import {
   ComAtprotoServerCreateSession,
-  ComAtprotoServerDescribeServer,
+  type ComAtprotoServerDescribeServer,
 } from '@atproto/api'
 import {msg, Trans} from '@lingui/macro'
 import {useLingui} from '@lingui/react'
@@ -133,7 +133,12 @@ export const LoginForm = ({
           password,
           authFactorToken: authFactorToken.trim(),
         },
-        'LoginForm',
+        {
+          name: 'LoginForm',
+          properties: {
+            error: error,
+          },
+        }
       )
       onAttemptSuccess()
       setShowLoggedOut(false)

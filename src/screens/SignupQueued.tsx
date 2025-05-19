@@ -7,7 +7,7 @@ import {useLingui} from '@lingui/react'
 
 import {logger} from '#/logger'
 import {isIOS, isWeb} from '#/platform/detection'
-import {isSignupQueued, useAgent, useSessionApi} from '#/state/session'
+import {useAgent, useSessionApi} from '#/state/session'
 import {useOnboardingDispatch} from '#/state/shell'
 import {Logo} from '#/view/icons/Logo'
 import {atoms as a, native, useBreakpoints, useTheme, web} from '#/alf'
@@ -41,9 +41,7 @@ export function SignupQueued() {
       if (res.data.activated) {
         // ready to go, exchange the access token for a usable one and kick off onboarding
         await agent.sessionManager.refreshSession()
-        if (!isSignupQueued(agent.session?.accessJwt)) {
-          onboardingDispatch({type: 'start'})
-        }
+        onboardingDispatch({type: 'start'})
       } else {
         // not ready, update UI
         setEstimatedTime(msToString(res.data.estimatedTimeMs))

@@ -45,11 +45,13 @@ import {Provider as ModerationOptsProvider} from '#/state/preferences/moderation
 import {Provider as UnreadNotifsProvider} from '#/state/queries/notifications/unread'
 import {Provider as ServiceAccountManager} from '#/state/service-config'
 import {
-  Provider as SessionProvider,
+  SessionContext,
   type SessionAccount,
   useSession,
   useSessionApi,
 } from '#/state/session'
+
+const SessionProvider = SessionContext.Provider
 import {readLastActiveAccount} from '#/state/session/util'
 import {Provider as ShellStateProvider} from '#/state/shell'
 import {Provider as ComposerProvider} from '#/state/shell/composer'
@@ -111,8 +113,12 @@ function InnerApp() {
         setIsReady(true)
       }
     }
-    const account = readLastActiveAccount()
-    onLaunch(account)
+    const account = readLastActiveAccount() as SessionAccount | undefined
+    if (account?.accessJwt && account?.refreshJwt) {
+      onLaunch(account)
+    } else {
+      onLaunch(undefined)
+    }
   }, [resumeSession])
 
   useEffect(() => {
@@ -204,7 +210,7 @@ function App() {
     <GeolocationProvider>
       <A11yProvider>
         <KeyboardControllerProvider>
-          <SessionProvider>
+          <SessionProvider value={useSession()}>
             <PrefsStateProvider>
               <I18nProvider>
                 <ShellStateProvider>

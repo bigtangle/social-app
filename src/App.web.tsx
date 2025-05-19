@@ -35,7 +35,7 @@ import {Provider as ModerationOptsProvider} from '#/state/preferences/moderation
 import {Provider as UnreadNotifsProvider} from '#/state/queries/notifications/unread'
 import {Provider as ServiceConfigProvider} from '#/state/service-config'
 import {
-  Provider as SessionProvider,
+  SessionContext,
   type SessionAccount,
   useSession,
   useSessionApi,
@@ -88,8 +88,12 @@ function InnerApp() {
         setIsReady(true)
       }
     }
-    const account = readLastActiveAccount()
-    onLaunch(account)
+    const account = readLastActiveAccount() as SessionAccount | undefined
+    if (account?.accessJwt && account?.refreshJwt) {
+      onLaunch(account)
+    } else {
+      onLaunch(undefined)
+    }
   }, [resumeSession])
 
   useEffect(() => {
@@ -182,7 +186,7 @@ function App() {
   return (
     <GeolocationProvider>
       <A11yProvider>
-        <SessionProvider>
+        <SessionContext.Provider value={useSession()}>
           <PrefsStateProvider>
             <I18nProvider>
               <ShellStateProvider>
@@ -202,7 +206,7 @@ function App() {
               </ShellStateProvider>
             </I18nProvider>
           </PrefsStateProvider>
-        </SessionProvider>
+        </SessionContext.Provider>
       </A11yProvider>
     </GeolocationProvider>
   )

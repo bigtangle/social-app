@@ -537,7 +537,7 @@ function AccountRow({
           msg`This will remove @${account.handle} from the quick access list.`,
         )}
         onConfirm={() => {
-          removeAccount(account)
+          removeAccount(account.did)
           Toast.show(_(msg`Account removed from quick access`))
         }}
         confirmButtonCta={_(msg`Remove`)}
